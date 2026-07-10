@@ -1,0 +1,20 @@
+node_modules/
+.next/
+dist/
+build/
+coverage/
+.turbo/
+
+# env
+.env
+.env*.local
+
+# logs
+*.log
+npm-debug.log*
+
+# os
+.DS_Store
+
+# prisma generated client (regenerated via postinstall)
+packages/db/generated/

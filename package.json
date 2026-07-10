@@ -1,0 +1,26 @@
+{
+  "name": "jobpilot",
+  "version": "0.0.0",
+  "private": true,
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "pnpm --filter @jobpilot/web dev",
+    "build": "pnpm --filter @jobpilot/web build",
+    "worker": "pnpm --filter @jobpilot/worker dev",
+    "typecheck": "pnpm -r typecheck",
+    "lint": "prettier --check .",
+    "format": "prettier --write .",
+    "db:generate": "pnpm --filter @jobpilot/db generate",
+    "db:migrate": "pnpm --filter @jobpilot/db migrate",
+    "db:studio": "pnpm --filter @jobpilot/db studio",
+    "up": "docker compose up -d",
+    "down": "docker compose down",
+    "postinstall": "pnpm --filter @jobpilot/db generate"
+  },
+  "devDependencies": {
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.2"
+  }
+}
