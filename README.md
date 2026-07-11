@@ -1,8 +1,13 @@
 # JobPilot
 
+**Live demo:** https://jobpilot-web-kappa.vercel.app · **Repo:** https://github.com/ShubhamR2407/jobpilot
+
 An AI job-search copilot — ingests jobs from company ATS feeds, scores each against your
 résumé with an LLM, and drafts tailored outreach. See [SPEC.md](./SPEC.md) for the design and
 [ROADMAP.md](./ROADMAP.md) for the build plan.
+
+> **Build status:** Step 0 (scaffold + deploy) complete — CI green, deployed. Next: Step 1
+> (job ingestion). See [ROADMAP.md](./ROADMAP.md).
 
 ## Stack
 
