@@ -4,3 +4,7 @@ node_modules
 dist
 coverage
 packages/db/prisma/migrations
+
+# Next.js manages these and rewrites them on build
+apps/web/next-env.d.ts
+apps/web/tsconfig.json
