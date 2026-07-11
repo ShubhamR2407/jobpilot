@@ -65,7 +65,13 @@ export async function GET(req: NextRequest) {
     });
 
     return NextResponse.json(jobs.map(toDTO));
-  } catch {
+  } catch (e) {
+    if (sp.get("debug") === "1") {
+      return NextResponse.json(
+        { error: String(e), stack: (e as Error)?.stack?.slice(0, 1200) },
+        { status: 500 },
+      );
+    }
     // DB unreachable (e.g. Vercel before a cloud DB exists) — return empty.
     return NextResponse.json([]);
   }
