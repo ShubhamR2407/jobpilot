@@ -1,0 +1,32 @@
+name: Poll & score
+
+# Ingests fresh ATS postings and AI-scores ONLY the new ones, into the cloud DB.
+# Runs on a schedule (free) — no always-on server needed.
+on:
+  schedule:
+    - cron: "*/15 * * * *" # every ~15 min (GitHub may delay under load)
+  workflow_dispatch: {} # allow manual runs from the Actions tab
+
+# Don't let overlapping runs double-score.
+concurrency:
+  group: poll
+  cancel-in-progress: false
+
+jobs:
+  poll:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @jobpilot/db generate
+      - run: pnpm --filter @jobpilot/worker poll
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
