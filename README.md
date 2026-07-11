@@ -6,10 +6,13 @@ An AI job-search copilot — ingests jobs from company ATS feeds, scores each ag
 résumé with an LLM, and drafts tailored outreach. See [SPEC.md](./SPEC.md) for the design and
 [ROADMAP.md](./ROADMAP.md) for the build plan.
 
-> **Build status:** Step 1 complete — ingests jobs from Greenhouse/Lever/Ashby into Postgres
-> via a BullMQ/Redis worker, listed on the homepage. Next: Step 2 (AI fit scoring). See
-> [ROADMAP.md](./ROADMAP.md). _(The Vercel demo shows an empty state until a cloud DB is
-> provisioned in Step 3; run locally to see real jobs.)_
+> **Build status:** Step 2 complete — a BullMQ/Redis worker ingests jobs from
+> Greenhouse/Lever/Ashby, and an LLM (Anthropic) scores each **new** posting against a résumé
+> (Haiku extraction + Sonnet fit-scoring with a cached résumé prefix). Scores, rationale, and
+> matched/gap skills render on the homepage; the worker polls on a schedule and spends tokens
+> only on fresh postings. Next: Step 3 (product UI + cloud deploy). See [ROADMAP.md](./ROADMAP.md).
+> _(The Vercel demo shows an empty state until a cloud DB is provisioned in Step 3; run locally
+> to see real jobs + scores.)_
 
 ## Stack
 

@@ -26,11 +26,32 @@ model Job {
   postedAt    DateTime?
   ingestedAt  DateTime  @default(now())
 
-  enrichment JobEnrichment?
-  fitScore   FitScore?
+  enrichment  JobEnrichment?
+  fitScore    FitScore?
+  application Application?
 
   @@unique([source, sourceJobId])
   @@index([ingestedAt])
+}
+
+enum ApplicationStatus {
+  SAVED
+  APPLIED
+  INTERVIEW
+  OFFER
+  REJECTED
+}
+
+/// Tracks a job the user has saved / is applying to (powers the kanban board).
+model Application {
+  id            String            @id @default(cuid())
+  jobId         String            @unique
+  job           Job               @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  status        ApplicationStatus @default(SAVED)
+  notes         String?           @db.Text
+  tailoredDraft String?           @db.Text // filled by Opus tailoring in Step 4
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
 }
 
 /// Shubham's résumé — the target every job is scored against. `active` lets him
