@@ -6,10 +6,11 @@ An AI job-search copilot — ingests jobs from company ATS feeds, scores each ag
 résumé with an LLM, and drafts tailored outreach. See [SPEC.md](./SPEC.md) for the design and
 [ROADMAP.md](./ROADMAP.md) for the build plan.
 
-> **Build status:** Step 3 complete — **live on Vercel** with a React Query dashboard (filters,
-> sort, save) and a drag-drop kanban board, backed by a Neon Postgres DB. A scheduled GitHub
-> Action ingests fresh ATS postings and AI-scores only the new ones (Haiku extraction + Sonnet
-> fit-scoring with a cached résumé prefix). Next: Step 4 (real-time + Opus tailoring) & Step 5
+> **Build status:** Step 4 complete — **live on Vercel** with a React Query dashboard (score /
+> source / remote / country filters, sort, save), a drag-drop kanban board, and **on-demand
+> Opus tailoring** (tailored résumé bullets + recruiter outreach per job). Backed by Neon
+> Postgres; a scheduled GitHub Action ingests fresh ATS postings and AI-scores only new ones
+> (Haiku extraction + Sonnet fit-scoring with a cached résumé prefix). Next: Step 5
 > (perf/tests/polish). See [ROADMAP.md](./ROADMAP.md).
 
 ## Stack
