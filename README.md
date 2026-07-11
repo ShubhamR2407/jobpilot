@@ -6,8 +6,10 @@ An AI job-search copilot — ingests jobs from company ATS feeds, scores each ag
 résumé with an LLM, and drafts tailored outreach. See [SPEC.md](./SPEC.md) for the design and
 [ROADMAP.md](./ROADMAP.md) for the build plan.
 
-> **Build status:** Step 0 (scaffold + deploy) complete — CI green, deployed. Next: Step 1
-> (job ingestion). See [ROADMAP.md](./ROADMAP.md).
+> **Build status:** Step 1 complete — ingests jobs from Greenhouse/Lever/Ashby into Postgres
+> via a BullMQ/Redis worker, listed on the homepage. Next: Step 2 (AI fit scoring). See
+> [ROADMAP.md](./ROADMAP.md). _(The Vercel demo shows an empty state until a cloud DB is
+> provisioned in Step 3; run locally to see real jobs.)_
 
 ## Stack
 
