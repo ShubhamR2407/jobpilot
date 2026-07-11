@@ -10,6 +10,7 @@
     "build": "pnpm --filter @jobpilot/web build",
     "worker": "pnpm --filter @jobpilot/worker dev",
     "typecheck": "pnpm -r typecheck",
+    "test": "pnpm -r test",
     "lint": "prettier --check .",
     "format": "prettier --write .",
     "db:generate": "pnpm --filter @jobpilot/db generate",

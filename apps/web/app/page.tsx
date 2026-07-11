@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchJobs, type Country, type JobFilters } from "./lib/jobs";
-import { JobCard } from "./components/JobCard";
+import { JobList } from "./components/JobList";
 
 const SOURCES = ["greenhouse", "lever", "ashby"];
 
@@ -40,7 +40,11 @@ export default function Dashboard() {
 
   return (
     <main className="mx-auto max-w-5xl px-6 py-8">
-      <div className="mb-6 flex flex-wrap items-end gap-x-6 gap-y-3 rounded-lg border border-neutral-800 p-4">
+      <h1 className="sr-only">Job dashboard</h1>
+      <section
+        aria-label="Job filters"
+        className="mb-6 flex flex-wrap items-end gap-x-6 gap-y-3 rounded-lg border border-neutral-800 p-4"
+      >
         <label className="flex flex-col gap-1 text-xs text-neutral-400">
           Min fit score: <span className="text-neutral-200">{minScore}</span>
           <input
@@ -108,7 +112,7 @@ export default function Dashboard() {
             <option value="date">Newest</option>
           </select>
         </label>
-      </div>
+      </section>
 
       {isLoading ? (
         <p className="text-neutral-500">Loading…</p>
@@ -119,11 +123,7 @@ export default function Dashboard() {
           <p className="mb-3 text-sm text-neutral-500">
             {jobs?.length ?? 0} jobs · {scored} AI-scored
           </p>
-          <ul className="flex flex-col gap-3">
-            {jobs?.map((job) => (
-              <JobCard key={job.id} job={job} />
-            ))}
-          </ul>
+          <JobList jobs={jobs ?? []} />
         </>
       )}
     </main>

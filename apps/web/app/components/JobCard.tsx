@@ -21,7 +21,10 @@ function timeAgo(iso: string | null): string | null {
 export function JobCard({ job }: { job: JobDTO }) {
   const s = job.fitScore;
   return (
-    <li className="rounded-lg border border-neutral-800 p-4">
+    <article
+      role="listitem"
+      className="rounded-lg border border-neutral-800 p-4"
+    >
       <div className="flex items-start gap-4">
         <ScoreBadge score={s?.score ?? null} />
 
@@ -102,6 +105,6 @@ export function JobCard({ job }: { job: JobDTO }) {
           />
         </div>
       </div>
-    </li>
+    </article>
   );
 }
