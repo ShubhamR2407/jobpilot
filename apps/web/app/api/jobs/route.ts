@@ -34,7 +34,12 @@ function toDTO(j: JobRow): JobDTO {
           remotePolicy: j.enrichment.remotePolicy,
         }
       : null,
-    application: j.application ? { status: j.application.status } : null,
+    application: j.application
+      ? {
+          status: j.application.status,
+          tailoredDraft: j.application.tailoredDraft,
+        }
+      : null,
   };
 }
 

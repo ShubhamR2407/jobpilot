@@ -28,6 +28,7 @@ export default function Dashboard() {
   } = useQuery({
     queryKey: ["jobs", filters],
     queryFn: () => fetchJobs(filters),
+    refetchInterval: 60_000, // newly-scored jobs surface without a manual reload
   });
 
   const toggleSource = (s: string) =>

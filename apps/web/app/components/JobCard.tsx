@@ -1,6 +1,7 @@
 import type { JobDTO } from "../lib/jobs";
 import { ScoreBadge } from "./ScoreBadge";
 import { StatusControl } from "./StatusControl";
+import { TailorPanel } from "./TailorPanel";
 
 const SOURCE_COLORS: Record<string, string> = {
   greenhouse: "text-emerald-400",
@@ -73,6 +74,11 @@ export function JobCard({ job }: { job: JobDTO }) {
               </div>
             </>
           )}
+
+          <TailorPanel
+            jobId={job.id}
+            existing={job.application?.tailoredDraft ?? null}
+          />
         </div>
       </div>
     </li>

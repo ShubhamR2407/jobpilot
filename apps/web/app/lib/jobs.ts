@@ -27,7 +27,10 @@ export interface JobDTO {
     stack: string[];
     remotePolicy: string | null;
   } | null;
-  application: { status: ApplicationStatus } | null;
+  application: {
+    status: ApplicationStatus;
+    tailoredDraft: string | null;
+  } | null;
 }
 
 export type Country = "india" | "global" | "all";
@@ -68,4 +71,11 @@ export async function setStatus(
 
 export async function unsave(jobId: string): Promise<void> {
   await fetch(`/api/jobs/${jobId}/application`, { method: "DELETE" });
+}
+
+export async function tailor(jobId: string): Promise<string> {
+  const res = await fetch(`/api/jobs/${jobId}/tailor`, { method: "POST" });
+  if (!res.ok) throw new Error("Failed to generate draft");
+  const data = (await res.json()) as { tailoredDraft: string };
+  return data.tailoredDraft;
 }

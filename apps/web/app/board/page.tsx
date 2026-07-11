@@ -48,7 +48,15 @@ export default function Board() {
       const prev = qc.getQueryData<JobDTO[]>(BOARD_KEY);
       qc.setQueryData<JobDTO[]>(BOARD_KEY, (old) =>
         old?.map((j) =>
-          j.id === jobId ? { ...j, application: { status } } : j,
+          j.id === jobId
+            ? {
+                ...j,
+                application: {
+                  status,
+                  tailoredDraft: j.application?.tailoredDraft ?? null,
+                },
+              }
+            : j,
         ),
       );
       return { prev };
