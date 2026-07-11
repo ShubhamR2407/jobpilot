@@ -8,3 +8,6 @@ allowBuilds:
   esbuild: true
   prisma: true
   sharp: true
+  # Optional native accelerator for BullMQ's msgpackr — JS fallback is fine,
+  # and declining it keeps installs portable (no node-gyp on CI).
+  msgpackr-extract: false

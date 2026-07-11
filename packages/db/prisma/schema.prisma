@@ -12,3 +12,20 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+/// A job posting scraped from a company ATS feed (Greenhouse / Lever / Ashby).
+model Job {
+  id          String    @id @default(cuid())
+  source      String // "greenhouse" | "lever" | "ashby"
+  sourceJobId String // the ATS's own id for this posting
+  title       String
+  company     String
+  location    String
+  url         String
+  rawJd       String    @db.Text // full job-description text (needed for AI in Step 2)
+  postedAt    DateTime?
+  ingestedAt  DateTime  @default(now())
+
+  @@unique([source, sourceJobId])
+  @@index([ingestedAt])
+}

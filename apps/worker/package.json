@@ -6,11 +6,14 @@
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "start": "tsx src/index.ts",
+    "ingest": "tsx src/scripts/ingest-once.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@jobpilot/core": "workspace:*",
-    "@jobpilot/db": "workspace:*"
+    "@jobpilot/db": "workspace:*",
+    "bullmq": "^5.34.0",
+    "dotenv": "^16.4.7"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",
