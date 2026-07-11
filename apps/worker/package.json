@@ -10,6 +10,7 @@
     "poll": "tsx src/scripts/poll-once.ts",
     "seed:resume": "tsx src/scripts/seed-resume.ts",
     "enrich": "tsx src/scripts/enrich-sample.ts",
+    "score:india": "tsx src/scripts/score-india.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
