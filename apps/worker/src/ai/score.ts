@@ -54,7 +54,7 @@ export async function scoreJob(
 
   const res = await anthropic.messages.create({
     model: MODELS.score,
-    max_tokens: 1024,
+    max_tokens: 2048, // headroom so a verbose rationale can't truncate the JSON
     thinking: { type: "disabled" },
     system: [
       {

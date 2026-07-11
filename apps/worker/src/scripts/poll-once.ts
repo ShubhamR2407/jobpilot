@@ -12,17 +12,28 @@ async function main(): Promise<void> {
   );
 
   let cost = 0;
+  let scored = 0;
+  let failed = 0;
+  // One bad job (e.g. a transient API error) must not kill the whole run.
   for (const jobId of res.newJobIds) {
-    const r = await scoreJobById(jobId);
-    if (r) {
-      cost += r.cost;
-      console.log(`  scored [${r.score}] ${r.title} @ ${r.company}`);
+    try {
+      const r = await scoreJobById(jobId);
+      if (r) {
+        cost += r.cost;
+        scored++;
+        console.log(`  scored [${r.score}] ${r.title} @ ${r.company}`);
+      }
+    } catch (err) {
+      failed++;
+      console.warn(`  score failed for ${jobId}: ${(err as Error).message}`);
     }
   }
 
   console.log(
     res.newJobIds.length
-      ? `scored ${res.newJobIds.length} new job(s) · $${cost.toFixed(4)}`
+      ? `scored ${scored}/${res.newJobIds.length} new job(s)` +
+          (failed ? ` (${failed} failed)` : "") +
+          ` · $${cost.toFixed(4)}`
       : "no new jobs to score.",
   );
 
