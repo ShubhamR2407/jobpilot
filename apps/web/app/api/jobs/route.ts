@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma, type Prisma } from "@jobpilot/db";
+import { isIndiaLocation } from "@jobpilot/core";
 import type { JobDTO } from "../../lib/jobs";
 
 export const dynamic = "force-dynamic";
@@ -44,6 +45,7 @@ export async function GET(req: NextRequest) {
   const remote = sp.get("remote") === "true";
   const saved = sp.get("saved") === "true";
   const sort = sp.get("sort") ?? "score";
+  const country = sp.get("country") ?? "all"; // "india" | "global" | "all"
 
   const where: Prisma.JobWhereInput = {};
   if (sources?.length) where.source = { in: sources };
@@ -52,11 +54,18 @@ export async function GET(req: NextRequest) {
   if (saved) where.application = { isNot: null };
 
   try {
-    const jobs = await prisma.job.findMany({
+    let jobs = await prisma.job.findMany({
       where,
       include: { fitScore: true, enrichment: true, application: true },
-      take: 300,
+      take: 500,
     });
+
+    // Country is derived from the fuzzy location string, so filter in JS.
+    // India = India cities + country-less remote roles; Global = everything else.
+    if (country === "india")
+      jobs = jobs.filter((j) => isIndiaLocation(j.location));
+    else if (country === "global")
+      jobs = jobs.filter((j) => !isIndiaLocation(j.location));
 
     jobs.sort((a, b) => {
       if (sort === "date")
@@ -64,7 +73,7 @@ export async function GET(req: NextRequest) {
       return (b.fitScore?.score ?? -1) - (a.fitScore?.score ?? -1);
     });
 
-    return NextResponse.json(jobs.map(toDTO));
+    return NextResponse.json(jobs.slice(0, 300).map(toDTO));
   } catch {
     // DB unreachable — return empty rather than erroring the page.
     return NextResponse.json([]);

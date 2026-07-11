@@ -30,12 +30,15 @@ export interface JobDTO {
   application: { status: ApplicationStatus } | null;
 }
 
+export type Country = "india" | "global" | "all";
+
 export interface JobFilters {
   minScore: number;
   sources: string[];
   remote: boolean;
   sort: "score" | "date";
   saved: boolean;
+  country: Country;
 }
 
 export async function fetchJobs(f: Partial<JobFilters>): Promise<JobDTO[]> {
@@ -45,6 +48,7 @@ export async function fetchJobs(f: Partial<JobFilters>): Promise<JobDTO[]> {
   if (f.remote) p.set("remote", "true");
   if (f.saved) p.set("saved", "true");
   if (f.sort) p.set("sort", f.sort);
+  if (f.country) p.set("country", f.country);
   const res = await fetch(`/api/jobs?${p.toString()}`);
   if (!res.ok) throw new Error("Failed to load jobs");
   return res.json();

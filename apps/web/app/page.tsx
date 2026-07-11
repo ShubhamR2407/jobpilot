@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { fetchJobs, type JobFilters } from "./lib/jobs";
+import { fetchJobs, type Country, type JobFilters } from "./lib/jobs";
 import { JobCard } from "./components/JobCard";
 
 const SOURCES = ["greenhouse", "lever", "ashby"];
@@ -12,8 +12,15 @@ export default function Dashboard() {
   const [sources, setSources] = useState<string[]>([]);
   const [remote, setRemote] = useState(false);
   const [sort, setSort] = useState<"score" | "date">("score");
+  const [country, setCountry] = useState<Country>("india");
 
-  const filters: Partial<JobFilters> = { minScore, sources, remote, sort };
+  const filters: Partial<JobFilters> = {
+    minScore,
+    sources,
+    remote,
+    sort,
+    country,
+  };
   const {
     data: jobs,
     isLoading,
@@ -74,6 +81,19 @@ export default function Dashboard() {
             className="accent-emerald-500"
           />
           Remote only
+        </label>
+
+        <label className="flex flex-col gap-1 text-xs text-neutral-400">
+          Country
+          <select
+            value={country}
+            onChange={(e) => setCountry(e.target.value as Country)}
+            className="rounded border border-neutral-700 bg-neutral-900 px-2 py-1 text-neutral-200"
+          >
+            <option value="india">India</option>
+            <option value="global">Global</option>
+            <option value="all">All</option>
+          </select>
         </label>
 
         <label className="flex flex-col gap-1 text-xs text-neutral-400">
