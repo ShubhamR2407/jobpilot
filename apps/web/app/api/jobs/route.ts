@@ -63,7 +63,9 @@ export async function GET(req: NextRequest) {
     let jobs = await prisma.job.findMany({
       where,
       include: { fitScore: true, enrichment: true, application: true },
-      take: 500,
+      // Fetch all matches so the JS country filter (below) sees the full set;
+      // the response is sliced to 300 after filtering/sorting.
+      take: 2000,
     });
 
     // Country is derived from the fuzzy location string, so filter in JS.
