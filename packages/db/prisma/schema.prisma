@@ -26,6 +26,45 @@ model Job {
   postedAt    DateTime?
   ingestedAt  DateTime  @default(now())
 
+  enrichment JobEnrichment?
+  fitScore   FitScore?
+
   @@unique([source, sourceJobId])
   @@index([ingestedAt])
+}
+
+/// Shubham's résumé — the target every job is scored against. `active` lets him
+/// A/B different résumé versions.
+model Resume {
+  id        String   @id @default(cuid())
+  content   String   @db.Text
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+}
+
+/// Structured fields an LLM (Haiku) extracts from a job's raw JD text.
+model JobEnrichment {
+  id               String   @id @default(cuid())
+  jobId            String   @unique
+  job              Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  seniority        String?
+  minYears         Int?
+  stack            String[]
+  remotePolicy     String?
+  responsibilities String[]
+  model            String
+  createdAt        DateTime @default(now())
+}
+
+/// An LLM (Sonnet) fit score of a job against the active résumé.
+model FitScore {
+  id            String   @id @default(cuid())
+  jobId         String   @unique
+  job           Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  score         Int // 0–100
+  matchedSkills String[]
+  gaps          String[]
+  rationale     String   @db.Text
+  model         String
+  createdAt     DateTime @default(now())
 }
