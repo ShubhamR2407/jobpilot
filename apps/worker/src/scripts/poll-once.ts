@@ -11,11 +11,21 @@ async function main(): Promise<void> {
     `ingest: scraped ${res.scraped} · new ${res.created} · updated ${res.updated}`,
   );
 
+  // Cap scoring per run so a big new batch (e.g. after adding companies) can't
+  // run up a surprise bill — the rest is picked up on subsequent runs.
+  const limit = Number(process.env.SCORE_LIMIT ?? 60);
+  const toScore = res.newJobIds.slice(0, limit);
+  if (res.newJobIds.length > toScore.length) {
+    console.log(
+      `scoring ${toScore.length}/${res.newJobIds.length} this run (SCORE_LIMIT=${limit}); rest next run`,
+    );
+  }
+
   let cost = 0;
   let scored = 0;
   let failed = 0;
   // One bad job (e.g. a transient API error) must not kill the whole run.
-  for (const jobId of res.newJobIds) {
+  for (const jobId of toScore) {
     try {
       const r = await scoreJobById(jobId);
       if (r) {
@@ -30,8 +40,8 @@ async function main(): Promise<void> {
   }
 
   console.log(
-    res.newJobIds.length
-      ? `scored ${scored}/${res.newJobIds.length} new job(s)` +
+    toScore.length
+      ? `scored ${scored}/${toScore.length} new job(s)` +
           (failed ? ` (${failed} failed)` : "") +
           ` · $${cost.toFixed(4)}`
       : "no new jobs to score.",

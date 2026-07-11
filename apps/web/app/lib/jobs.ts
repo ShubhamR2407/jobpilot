@@ -15,6 +15,7 @@ export interface JobDTO {
   source: string;
   url: string;
   postedAt: string | null;
+  jdPreview: string;
   fitScore: {
     score: number;
     rationale: string;

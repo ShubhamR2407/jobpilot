@@ -14,9 +14,9 @@ tailored application material on demand. It's a TypeScript monorepo: Next.js fro
 queue-based worker, PostgreSQL, and Anthropic's API, deployed live on Vercel with a Neon database
 and a scheduled GitHub Action doing the scraping and scoring."
 
-**2min:** add the *why* — "I built it because my real work is private company code a recruiter
+**2min:** add the _why_ — "I built it because my real work is private company code a recruiter
 can't see, so I needed one deployed, verifiable full-stack project. The interesting parts are:
-(1) it only spends LLM tokens on *newly-posted* jobs, not the stale backlog, so it costs cents a
+(1) it only spends LLM tokens on _newly-posted_ jobs, not the stale backlog, so it costs cents a
 day; (2) I tiered the models by task — a cheap model for extraction, a mid model for scoring, the
 top model only for on-demand writing; (3) the whole thing runs free on serverless + a cron, and I
 made deliberate simplicity choices like polling over WebSockets because the update cadence is
@@ -36,12 +36,12 @@ Local dev only: BullMQ + Redis worker (queues + scheduled poll)
 ```
 
 - **Monorepo (pnpm workspaces):** `apps/web`, `apps/worker`, `packages/db`, `packages/core`.
-  *Why:* shared types and DB client across frontend and worker without publishing packages;
+  _Why:_ shared types and DB client across frontend and worker without publishing packages;
   one install, one typecheck, atomic changes across the stack.
-- **`packages/core`** is pure functions (matching/filtering) with no I/O — *why:* trivially
+- **`packages/core`** is pure functions (matching/filtering) with no I/O — _why:_ trivially
   unit-testable, and shared by both the worker and the web API.
 - **Two runtimes for the worker:** a BullMQ/Redis queue worker for local/always-on, and a
-  simple `poll-once` script for the serverless cron. *Why:* the queue is the "real" async
+  simple `poll-once` script for the serverless cron. _Why:_ the queue is the "real" async
   architecture; the cron is what actually fits a free serverless deploy. (See §8.)
 
 **Likely Q: "Why a monorepo instead of separate repos?"** Shared `packages/core` types and the
@@ -79,7 +79,7 @@ scored, and I can re-score without touching the job row.
 - `Promise.allSettled` across sources so one failing ATS doesn't sink the run.
 
 **Q: "How do you decide which jobs to score?"** `ingestAll()` returns the ids of jobs that were
-*newly created* (I query existing `(source, sourceJobId)` keys first, then diff). Only those get
+_newly created_ (I query existing `(source, sourceJobId)` keys first, then diff). Only those get
 scored — so the stale backlog is never re-scored and tokens are spent only on fresh postings.
 
 **Q: "Weakness of that design?"** If scoring fails for a newly-created job, it won't be retried
@@ -100,7 +100,7 @@ fix would be a `scoredAt`/status marker so failed jobs get picked up again.
 - **Prompt caching** — the résumé + rubric are a cached system prefix, so scoring many jobs
   reuses that cache (~90% cheaper on those tokens).
 - **LLM-judge, not embeddings** — Claude reads (résumé, JD) and returns a score + rationale.
-  *Why not RAG/embeddings?* Single provider (Anthropic has no embeddings API — would need a 2nd
+  _Why not RAG/embeddings?_ Single provider (Anthropic has no embeddings API — would need a 2nd
   vendor), simpler, and the rationale is a feature. Embeddings would be a Phase-2 pre-filter at
   scale.
 
@@ -138,15 +138,15 @@ the client never imports Prisma.
 
 **Q: "WebSockets?"** Considered, chose 60s polling — updates are gated by a 15-min scraper cron,
 so push would be complexity for no benefit, and it needs an always-on server the free serverless
-deploy doesn't have. Polling is simpler and more than fast enough. *(This is a deliberate
-tradeoff, not a gap.)*
+deploy doesn't have. Polling is simpler and more than fast enough. _(This is a deliberate
+tradeoff, not a gap.)_
 
 ---
 
 ## 7. The async worker (BullMQ / Redis)
 
 - Local: two BullMQ queues (`ingest`, `score`) on Redis, plus a repeatable job that polls every
-  5 min. Ingest enqueues a score job per *new* posting; the score worker runs at concurrency 3.
+  5 min. Ingest enqueues a score job per _new_ posting; the score worker runs at concurrency 3.
 - BullMQ gets **connection options** (host/port), not an ioredis instance — see §9 for why.
 
 **Q: "Why a queue at all?"** Decouples scraping from scoring, gives retries and concurrency
@@ -160,7 +160,7 @@ simpler cron path (below), but the queue is how it works when run always-on.
 - **Vercel** hosts the Next.js app. **Neon** is the managed Postgres. A **scheduled GitHub
   Action** (`.github/workflows/poll.yml`, every ~15 min) runs `poll-once` — ingest + score new
   jobs — against Neon.
-- *Why this shape?* $0/month. There's no always-on server, so the BullMQ/Redis worker doesn't run
+- _Why this shape?_ $0/month. There's no always-on server, so the BullMQ/Redis worker doesn't run
   in prod; the cron does the same work via `poll-once` (no queue). Tailoring runs on-demand in a
   Vercel serverless function.
 
@@ -183,22 +183,22 @@ These are gold — practice telling each as: symptom → investigation → root 
 1. **Live site showed an empty page; API returned `[]`.** Everything worked locally and in the
    GitHub Action, but not on Vercel. I'd set the DB env var and redeployed — still empty. I added
    a temporary debug flag to surface the swallowed error and found:
-   *"Prisma Client could not locate the Query Engine for runtime `rhel-openssl-3.0.x`."*
+   _"Prisma Client could not locate the Query Engine for runtime `rhel-openssl-3.0.x`."_
    **Root cause:** in a pnpm monorepo, Next's bundler didn't copy Prisma's Linux query-engine
    binary into the serverless function. **Fix:** add `binaryTargets = ["native",
-   "rhel-openssl-3.0.x"]` to the schema *and* `outputFileTracingRoot` + `outputFileTracingIncludes`
-   in `next.config` so the engine ships with the function. *Lesson:* the catch block was hiding
+"rhel-openssl-3.0.x"]` to the schema _and_ `outputFileTracingRoot` + `outputFileTracingIncludes`
+   in `next.config` so the engine ships with the function. _Lesson:_ the catch block was hiding
    the real error — always surface it while debugging.
 
 2. **Scheduled scoring crashed mid-run.** The cron scored ~18 jobs then exited 1. Error:
    `SyntaxError: Unterminated string in JSON`. **Root cause:** `max_tokens: 1024` truncated a
    verbose scoring response, producing invalid JSON that `JSON.parse` choked on — and one bad job
-   took down the whole loop. **Fix:** raised `max_tokens` to 2048 (root cause) *and* wrapped
+   took down the whole loop. **Fix:** raised `max_tokens` to 2048 (root cause) _and_ wrapped
    per-job scoring in try/catch so one failure can't fail the batch (resilience).
 
 3. **Worker wouldn't typecheck: two `ioredis` versions.** BullMQ bundles its own ioredis; my
    direct dependency resolved a different minor version, so an ioredis instance wasn't assignable
-   to BullMQ's connection type. **Fix:** pass connection *options* to BullMQ instead of an
+   to BullMQ's connection type. **Fix:** pass connection _options_ to BullMQ instead of an
    instance, and drop the direct ioredis dep — one version in the tree.
 
 4. **Neon cold start.** Free-tier Neon scales the compute to zero when idle; the first connection

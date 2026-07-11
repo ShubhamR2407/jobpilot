@@ -9,6 +9,15 @@ const SOURCE_COLORS: Record<string, string> = {
   ashby: "text-violet-400",
 };
 
+function timeAgo(iso: string | null): string | null {
+  if (!iso) return null;
+  const d = (Date.now() - new Date(iso).getTime()) / 1000;
+  if (d < 3600) return `${Math.max(1, Math.round(d / 60))}m ago`;
+  if (d < 86400) return `${Math.round(d / 3600)}h ago`;
+  if (d < 86400 * 30) return `${Math.round(d / 86400)}d ago`;
+  return new Date(iso).toLocaleDateString();
+}
+
 export function JobCard({ job }: { job: JobDTO }) {
   const s = job.fitScore;
   return (
@@ -49,7 +58,19 @@ export function JobCard({ job }: { job: JobDTO }) {
                   <span className="capitalize">{job.enrichment.seniority}</span>
                 </>
               )}
+            {job.postedAt && (
+              <>
+                <span aria-hidden>·</span>
+                <span>{timeAgo(job.postedAt)}</span>
+              </>
+            )}
           </div>
+
+          {job.jdPreview && (
+            <p className="mt-1.5 line-clamp-2 text-xs text-neutral-500">
+              {job.jdPreview}
+            </p>
+          )}
 
           {s && (
             <>

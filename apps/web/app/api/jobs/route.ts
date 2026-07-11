@@ -18,6 +18,7 @@ function toDTO(j: JobRow): JobDTO {
     source: j.source,
     url: j.url,
     postedAt: j.postedAt ? j.postedAt.toISOString() : null,
+    jdPreview: j.rawJd.slice(0, 600),
     fitScore: j.fitScore
       ? {
           score: j.fitScore.score,
