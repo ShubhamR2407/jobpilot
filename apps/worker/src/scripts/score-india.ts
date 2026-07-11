@@ -3,16 +3,19 @@ import { prisma } from "@jobpilot/db";
 import { isIndiaLocation } from "@jobpilot/core";
 import { scoreJobById } from "../ai/pipeline.js";
 
-// One-time: score all currently-unscored India-eligible jobs (India-first focus).
-// Usage: pnpm --filter @jobpilot/worker score:india [limit]
+// Score India-eligible jobs. By default only unscored ones; pass --force to
+// re-score already-scored India jobs too (e.g. after the résumé changes).
+// Usage: pnpm --filter @jobpilot/worker score:india [limit] [--force]
 async function main(): Promise<void> {
-  const limit = Number(process.argv[2] ?? 400);
+  const args = process.argv.slice(2);
+  const force = args.includes("--force");
+  const limit = Number(args.find((a) => /^\d+$/.test(a)) ?? 400);
 
-  const unscored = await prisma.job.findMany({
-    where: { fitScore: { is: null } },
+  const candidates = await prisma.job.findMany({
+    where: force ? {} : { fitScore: { is: null } },
     select: { id: true, location: true },
   });
-  const india = unscored.filter((j) => isIndiaLocation(j.location));
+  const india = candidates.filter((j) => isIndiaLocation(j.location));
   const batch = india.slice(0, limit);
   console.log(
     `India-eligible unscored: ${india.length} · scoring ${batch.length}`,

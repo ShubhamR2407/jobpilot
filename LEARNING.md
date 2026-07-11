@@ -3,7 +3,7 @@
 The goal of this doc is **understanding**, not memorizing. For each piece of the stack:
 **What it is · Why we chose it (vs alternatives) · How it's used in JobPilot · Questions to test yourself.**
 
-If you can answer the questions in your own words *and explain the "why"*, you can handle any
+If you can answer the questions in your own words _and explain the "why"_, you can handle any
 interviewer. Pair this with [INTERVIEW.md](./INTERVIEW.md) (the concise Q&A) and the actual code.
 
 ---
@@ -20,9 +20,10 @@ skills — lets me filter/save/track them on a board, and drafts tailored applic
 demand.
 
 **The arc of decisions (this is what interviewers care about):**
+
 1. **Reuse over rebuild** — I had a Python side-project (JobAlert) that scraped these feeds. I
    ported the scrapers to TypeScript so the whole stack is one language.
-2. **Only score *new* jobs** — scoring every job with an LLM costs money. I detect newly-posted
+2. **Only score _new_ jobs** — scoring every job with an LLM costs money. I detect newly-posted
    jobs and score only those, so it runs at cents/day instead of dollars.
 3. **Tier the models** — cheap model for mechanical extraction, mid model for judgment (scoring),
    top model only for writing (tailoring). Cost/quality matched to the task.
@@ -53,6 +54,7 @@ shared functions (job matching), `packages/db` holds the Prisma client. Both app
 via `workspace:*`.
 
 **Test yourself:**
+
 - What problem does a monorepo solve that multi-repo doesn't? What's the cost?
 - What does `workspace:*` mean in a package.json dependency?
 - Why is `packages/core` kept free of I/O (no DB, no network)?
@@ -70,6 +72,7 @@ fails if types break. `noUncheckedIndexedAccess` is on, so array access is `T | 
 you'll see `jobs[i]!` or a guard).
 
 **Test yourself:**
+
 - What's the difference between a type error and a runtime error? Which does TS prevent?
 - What does `tsc --noEmit` do?
 - Why does `arr[i]` have type `T | undefined` under `noUncheckedIndexedAccess`?
@@ -80,18 +83,20 @@ you'll see `jobs[i]!` or a guard).
 components are **Server Components** by default and run on the server, unless marked
 `"use client"`.
 
-**Why:** one framework for the UI *and* the backend (API route handlers), server rendering for
+**Why:** one framework for the UI _and_ the backend (API route handlers), server rendering for
 speed/SEO, and a clean file-based structure. Deploys to Vercel with zero config.
 
 **How here:**
+
 - Pages like `app/page.tsx` are marked `"use client"` because they use hooks (React Query,
   useState) and interactivity.
 - **Route handlers** (`app/api/jobs/route.ts`) are the REST backend — they run on the server
   (Node runtime), talk to Postgres via Prisma, and return JSON.
-- `export const dynamic = "force-dynamic"` tells Next *not* to pre-render at build time (there's
+- `export const dynamic = "force-dynamic"` tells Next _not_ to pre-render at build time (there's
   no DB during a build) — the route runs fresh on each request.
 
 **Test yourself:**
+
 - Server Component vs Client Component — what runs where, and how do you opt into a client one?
 - Why does the dashboard need `"use client"` but the API route doesn't?
 - What does `force-dynamic` prevent, and why do we need it here?
@@ -107,15 +112,17 @@ give it a `queryKey` + a fetch function; it caches by key, dedupes, refetches, a
 optimistic updates and get them subtly wrong. React Query gives all of that as primitives.
 
 **How here:**
+
 - `useQuery({ queryKey: ["jobs", filters], queryFn })` — refetches automatically when filters
   change (the key changes).
 - `refetchInterval: 60_000` — the dashboard **polls** every 60s so newly-scored jobs appear
   without a manual reload (our "live updates").
-- **Optimistic mutations** on the kanban: on drag, `onMutate` updates the cache *immediately*
+- **Optimistic mutations** on the kanban: on drag, `onMutate` updates the cache _immediately_
   (`setQueryData`), and `onError` rolls back — the UI feels instant, and reconciles with the
   server on `onSettled` via `invalidateQueries`.
 
 **Test yourself:**
+
 - What is "server state" and why is it different from local UI state?
 - What does the `queryKey` do? What happens when it changes?
 - Walk through an optimistic update: onMutate → onError → onSettled. What is each for?
@@ -133,6 +140,7 @@ in a separate worker keeps the API fast and lets the work be retried/scheduled.
 a BullMQ queue worker; in prod the same logic runs from a scheduled GitHub Action.
 
 **Test yourself:**
+
 - Why not do the scraping inside an API request handler?
 - What does "async" actually buy you here (I/O-bound vs CPU-bound work)?
 
@@ -149,10 +157,11 @@ queue and retry; you control concurrency; you can schedule repeatable jobs. It's
 `score`) on Redis; ingest enqueues a score job per new posting; the score worker runs at
 concurrency 3; a repeatable job polls every 5 min. **In production I did NOT use BullMQ/Redis** —
 the free serverless deploy has no always-on server to host them, so a scheduled GitHub Action runs
-the same ingest+score logic directly (`poll-once`). *That local-vs-prod split is a deliberate
-choice, and a great interview answer.*
+the same ingest+score logic directly (`poll-once`). _That local-vs-prod split is a deliberate
+choice, and a great interview answer._
 
 **Test yourself:**
+
 - What is Redis, and why is a queue built on it (vs a DB table)?
 - What does a message queue give you that a direct function call doesn't? (retries, concurrency,
   decoupling, scheduling)
@@ -169,14 +178,16 @@ gives type-safe queries (autocomplete, compile-time checks), painless migrations
 hand-written SQL for the common cases.
 
 **How here:**
+
 - `schema.prisma` defines `Job`, `JobEnrichment`, `FitScore`, `Resume`, `Application`.
 - **Dedup:** `@@unique([source, sourceJobId])` + `prisma.job.upsert()` — re-scraping never inserts
   a duplicate.
-- **Relations:** 1:1 from Job to Enrichment/FitScore/Application, so a job can exist *before* it's
+- **Relations:** 1:1 from Job to Enrichment/FitScore/Application, so a job can exist _before_ it's
   scored, and scoring is a separate optional row.
 - **Migrations:** `prisma migrate dev` (local, creates migration files) / `migrate deploy` (prod).
 
 **Test yourself:**
+
 - What is an ORM, and what does Prisma generate from the schema?
 - What's an `upsert`, and how does the unique constraint make dedup work?
 - Why separate `FitScore` into its own table instead of columns on `Job`?
@@ -195,6 +206,7 @@ needs `?content=true` for the full JD; results run through pure filters (title k
 experience cap) from `packages/core`. `Promise.allSettled` so one bad feed doesn't sink the run.
 
 **Test yourself:**
+
 - What's a REST API? What does an HTTP GET return here?
 - Why `Promise.allSettled` instead of `Promise.all`?
 - What's a User-Agent header and why set it?
@@ -206,7 +218,8 @@ experience cap) from `packages/core`. `Promise.allSettled` so one bad feed doesn
 fit, and write tailored text.
 
 **Why & how — the concepts to really understand:**
-- **Tokens & cost:** models bill per input/output token. That's *why* cost control matters and
+
+- **Tokens & cost:** models bill per input/output token. That's _why_ cost control matters and
   why we tier models.
 - **Tiered models:** `claude-haiku-4-5` (cheap) for mechanical JD extraction; `claude-sonnet-5`
   (mid) for scoring judgment; `claude-opus-4-8` (top) only for on-demand writing. Match model
@@ -215,12 +228,13 @@ fit, and write tailored text.
   valid JSON matching your shape — no fragile string parsing.
 - **Prompt caching:** the résumé + rubric are a cached system prefix; scoring many jobs reuses
   that cached prefix at ~10% of the token cost — hence "~90% cheaper repeat scoring."
-- **LLM-as-judge vs embeddings:** we let Claude read (résumé, JD) and *judge* fit with a rationale,
+- **LLM-as-judge vs embeddings:** we let Claude read (résumé, JD) and _judge_ fit with a rationale,
   rather than compare vector embeddings. Simpler, single-provider, and the rationale is a feature.
   Embeddings would be a scale-time pre-filter.
 - **Score only new jobs:** the biggest cost lever — never re-score the backlog.
 
 **Test yourself:**
+
 - What's a token? How does token count drive cost?
 - Why use Haiku for extraction but Sonnet for scoring? Why is Opus reserved for tailoring?
 - What do structured outputs guarantee, and what do they replace?
@@ -237,12 +251,14 @@ Postgres; a **GitHub Action** runs on a cron to scrape + score.
 zero when idle.
 
 **How here:**
+
 - Push to `main` → Vercel builds & deploys the web app.
 - `.github/workflows/poll.yml` runs every ~15 min → `poll-once` against Neon (secrets:
   `DATABASE_URL`, `ANTHROPIC_API_KEY`).
 - Secrets live in GitHub Actions secrets + Vercel env vars — never committed.
 
 **Test yourself:**
+
 - What does "serverless" mean, and what's the tradeoff vs an always-on server?
 - Why a cron/GitHub Action instead of hosting the BullMQ worker?
 - Where do secrets live, and why never in the repo?
@@ -254,11 +270,12 @@ zero when idle.
 
 **Why:** the matching helpers (does a title match? is this location India-eligible?) are pure
 functions — same input, same output, no I/O — so they're cheap to test and catch regressions.
-That's *why* we kept them pure in `packages/core`.
+That's _why_ we kept them pure in `packages/core`.
 
 **How here:** `packages/core/src/matching.test.ts` (15 tests); `pnpm test` runs in CI.
 
 **Test yourself:**
+
 - What's a unit test? What makes a function easy to unit-test?
 - Why test the matching helpers but not the scrapers (which do network I/O)?
 - What's the difference between unit, integration, and E2E tests?
@@ -276,6 +293,7 @@ fast (better INP/LCP).
 are variable-height). Capture real numbers with `npx lighthouse <url> --view`.
 
 **Test yourself:**
+
 - What does virtualization actually do to the DOM, and why is it faster?
 - What are LCP, CLS, INP — roughly what does each measure?
 - Why is variable-height virtualization harder than fixed-height?
@@ -286,14 +304,14 @@ are variable-height). Capture real numbers with `npx lighthouse <url> --view`.
 
 Interviewers love "why did you choose X over Y." Each of these is a real decision you made:
 
-| Decision | Chose | Over | Because |
-|---|---|---|---|
-| Real-time | **60s polling** | WebSockets | Updates gated by a 15-min cron — push adds complexity for no benefit, needs an always-on server |
-| Prod worker | **Scheduled cron** | Always-on BullMQ worker | Free serverless has no always-on server; a single-user app doesn't need one |
-| Fit scoring | **LLM-judge** | Embeddings/RAG | Single provider, simpler, rationale is a feature; embeddings = scale-time pre-filter |
-| Scoring scope | **New jobs only** | Score everything | Cost — the backlog is stale and expensive to re-score |
-| Model per task | **Tiered (Haiku/Sonnet/Opus)** | One model everywhere | Match cost to task difficulty |
-| API style | **REST route handlers** | GraphQL | Simpler, sufficient for this surface |
+| Decision       | Chose                          | Over                    | Because                                                                                         |
+| -------------- | ------------------------------ | ----------------------- | ----------------------------------------------------------------------------------------------- |
+| Real-time      | **60s polling**                | WebSockets              | Updates gated by a 15-min cron — push adds complexity for no benefit, needs an always-on server |
+| Prod worker    | **Scheduled cron**             | Always-on BullMQ worker | Free serverless has no always-on server; a single-user app doesn't need one                     |
+| Fit scoring    | **LLM-judge**                  | Embeddings/RAG          | Single provider, simpler, rationale is a feature; embeddings = scale-time pre-filter            |
+| Scoring scope  | **New jobs only**              | Score everything        | Cost — the backlog is stale and expensive to re-score                                           |
+| Model per task | **Tiered (Haiku/Sonnet/Opus)** | One model everywhere    | Match cost to task difficulty                                                                   |
+| API style      | **REST route handlers**        | GraphQL                 | Simpler, sufficient for this surface                                                            |
 
 ---
 
@@ -303,7 +321,7 @@ Practice each as: **symptom → how you investigated → root cause → fix → 
 
 1. **Live site silently empty.** Worked locally + in the GitHub Action, not on Vercel; the API
    returned `[]`. I added a temporary debug flag to surface the swallowed error:
-   *"Prisma Client could not locate the Query Engine for runtime rhel-openssl-3.0.x."* **Root
+   _"Prisma Client could not locate the Query Engine for runtime rhel-openssl-3.0.x."_ **Root
    cause:** in a pnpm monorepo, Next's bundler didn't ship Prisma's Linux query-engine binary into
    the serverless function. **Fix:** `binaryTargets` in the schema + `outputFileTracing` in
    next.config. **Lesson:** a catch block was hiding the real error — always surface it while
@@ -312,7 +330,7 @@ Practice each as: **symptom → how you investigated → root cause → fix → 
    **Root cause:** `max_tokens` too low truncated a verbose LLM response → invalid JSON → one bad
    job killed the whole loop. **Fix:** raised `max_tokens` + wrapped per-job scoring in try/catch.
    **Lesson:** bound outputs, and isolate per-item failures in a batch.
-3. **Two ioredis versions** made the worker not type-check. **Fix:** pass connection *options* to
+3. **Two ioredis versions** made the worker not type-check. **Fix:** pass connection _options_ to
    BullMQ instead of an instance → one version in the tree.
 4. **Neon cold start** — free-tier Postgres scales to zero; the first connection after idle can
    fail. Context for bug #1's red herrings.
