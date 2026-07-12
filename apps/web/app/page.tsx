@@ -2,7 +2,12 @@
 
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { fetchJobs, type Country, type JobFilters } from "./lib/jobs";
+import {
+  fetchJobs,
+  type Country,
+  type JobFilters,
+  type Status,
+} from "./lib/jobs";
 import { JobList } from "./components/JobList";
 
 const SOURCES = ["greenhouse", "lever", "ashby"];
@@ -13,6 +18,8 @@ export default function Dashboard() {
   const [remote, setRemote] = useState(false);
   const [sort, setSort] = useState<"score" | "date">("score");
   const [country, setCountry] = useState<Country>("india");
+  const [status, setStatus] = useState<Status>("unapplied");
+  const [maxAgeDays, setMaxAgeDays] = useState(2);
 
   const filters: Partial<JobFilters> = {
     minScore,
@@ -20,6 +27,8 @@ export default function Dashboard() {
     remote,
     sort,
     country,
+    status,
+    maxAgeDays,
   };
   const {
     data: jobs,
@@ -112,18 +121,50 @@ export default function Dashboard() {
             <option value="date">Newest</option>
           </select>
         </label>
+
+        <label className="flex flex-col gap-1 text-xs text-neutral-400">
+          Show
+          <select
+            value={status}
+            onChange={(e) => setStatus(e.target.value as Status)}
+            className="rounded border border-neutral-700 bg-neutral-900 px-2 py-1 text-neutral-200"
+          >
+            <option value="unapplied">Unapplied</option>
+            <option value="tracked">Applied / saved</option>
+            <option value="all">All</option>
+          </select>
+        </label>
+
+        <label className="flex flex-col gap-1 text-xs text-neutral-400">
+          Posted
+          <select
+            value={maxAgeDays}
+            onChange={(e) => setMaxAgeDays(Number(e.target.value))}
+            className="rounded border border-neutral-700 bg-neutral-900 px-2 py-1 text-neutral-200"
+          >
+            <option value={2}>Last 2 days</option>
+            <option value={7}>Last 7 days</option>
+            <option value={0}>Any time</option>
+          </select>
+        </label>
       </section>
 
       {isLoading ? (
         <p className="text-neutral-500">Loading…</p>
       ) : isError ? (
         <p className="text-rose-400">Failed to load jobs.</p>
+      ) : !jobs || jobs.length === 0 ? (
+        <div className="rounded-lg border border-dashed border-neutral-800 p-10 text-center text-neutral-500">
+          No jobs match these filters. Try widening{" "}
+          <span className="text-neutral-300">Posted</span> or{" "}
+          <span className="text-neutral-300">Show</span>.
+        </div>
       ) : (
         <>
           <p className="mb-3 text-sm text-neutral-500">
-            {jobs?.length ?? 0} jobs · {scored} AI-scored
+            {jobs.length} jobs · {scored} AI-scored
           </p>
-          <JobList jobs={jobs ?? []} />
+          <JobList jobs={jobs} />
         </>
       )}
     </main>

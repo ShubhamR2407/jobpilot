@@ -35,6 +35,7 @@ export interface JobDTO {
 }
 
 export type Country = "india" | "global" | "all";
+export type Status = "unapplied" | "tracked" | "all";
 
 export interface JobFilters {
   minScore: number;
@@ -43,6 +44,8 @@ export interface JobFilters {
   sort: "score" | "date";
   saved: boolean;
   country: Country;
+  status: Status;
+  maxAgeDays: number; // 0 = any age
 }
 
 export async function fetchJobs(f: Partial<JobFilters>): Promise<JobDTO[]> {
@@ -53,6 +56,8 @@ export async function fetchJobs(f: Partial<JobFilters>): Promise<JobDTO[]> {
   if (f.saved) p.set("saved", "true");
   if (f.sort) p.set("sort", f.sort);
   if (f.country) p.set("country", f.country);
+  if (f.status) p.set("status", f.status);
+  if (f.maxAgeDays) p.set("maxAgeDays", String(f.maxAgeDays));
   const res = await fetch(`/api/jobs?${p.toString()}`);
   if (!res.ok) throw new Error("Failed to load jobs");
   return res.json();
