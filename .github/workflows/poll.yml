@@ -4,7 +4,10 @@ name: Poll & score
 # Runs on a schedule (free) — no always-on server needed.
 on:
   schedule:
-    - cron: "*/15 * * * *" # every ~15 min (GitHub may delay under load)
+    # ~Every 15 min, but at :08/:23/:38/:53 rather than the top-of-hour :00,
+    # where GitHub's scheduled-job queue is most congested. GitHub scheduling is
+    # best-effort — it can still delay/drop runs under load (docs note this).
+    - cron: "8,23,38,53 * * * *"
   workflow_dispatch: {} # allow manual runs from the Actions tab
 
 # Don't let overlapping runs double-score.

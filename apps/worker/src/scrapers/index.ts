@@ -3,6 +3,7 @@ import { EXCLUDE_TITLE_KEYWORDS, MAX_EXPERIENCE_YEARS } from "../config.js";
 import { scrapeGreenhouse } from "./greenhouse.js";
 import { scrapeLever } from "./lever.js";
 import { scrapeAshby } from "./ashby.js";
+import { scrapeWorkday } from "./workday.js";
 
 /** Run all ATS scrapers, apply post-filters, and dedup within the run. */
 export async function runAllScrapers(): Promise<ScrapedJob[]> {
@@ -10,6 +11,7 @@ export async function runAllScrapers(): Promise<ScrapedJob[]> {
     scrapeGreenhouse(),
     scrapeLever(),
     scrapeAshby(),
+    scrapeWorkday(),
   ]);
 
   const all: ScrapedJob[] = [];

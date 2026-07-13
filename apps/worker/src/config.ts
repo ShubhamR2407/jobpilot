@@ -185,3 +185,17 @@ export const COMPANIES = {
     "moderntreasury",
   ],
 } as const;
+
+/** Workday careers-site URLs. Workday has no global directory, so each company
+ * is its exact public careers URL — the scraper parses tenant/datacenter/site
+ * out of it (`https://{tenant}.{dc}.myworkdayjobs.com/{site}`). To add a company,
+ * open its Workday careers page and paste the URL here. All below are verified to
+ * return the public jobs JSON and hire software engineers (incl. India offices). */
+export const WORKDAY: readonly string[] = [
+  "https://nvidia.wd5.myworkdayjobs.com/NVIDIAExternalCareerSite",
+  "https://salesforce.wd12.myworkdayjobs.com/External_Career_Site",
+  "https://adobe.wd5.myworkdayjobs.com/external_experienced",
+  "https://paypal.wd1.myworkdayjobs.com/jobs",
+  "https://autodesk.wd1.myworkdayjobs.com/uni",
+  "https://workday.wd5.myworkdayjobs.com/Workday",
+];

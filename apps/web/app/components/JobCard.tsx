@@ -7,6 +7,7 @@ const SOURCE_COLORS: Record<string, string> = {
   greenhouse: "text-emerald-400",
   lever: "text-sky-400",
   ashby: "text-violet-400",
+  workday: "text-amber-400",
 };
 
 function timeAgo(iso: string | null): string | null {

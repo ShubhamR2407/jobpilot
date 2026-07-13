@@ -10,7 +10,7 @@ import {
 } from "./lib/jobs";
 import { JobList } from "./components/JobList";
 
-const SOURCES = ["greenhouse", "lever", "ashby"];
+const SOURCES = ["greenhouse", "lever", "ashby", "workday"];
 
 export default function Dashboard() {
   const [minScore, setMinScore] = useState(0);

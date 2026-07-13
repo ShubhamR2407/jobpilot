@@ -1,4 +1,4 @@
-export type JobSource = "greenhouse" | "lever" | "ashby";
+export type JobSource = "greenhouse" | "lever" | "ashby" | "workday";
 
 /** A job as scraped from an ATS feed, before it is persisted. */
 export interface ScrapedJob {
