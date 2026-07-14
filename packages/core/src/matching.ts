@@ -174,11 +174,20 @@ export function experienceOk(text: string, maxYears: number): boolean {
   return parseInt(m[1], 10) <= maxYears;
 }
 
-/** India-eligible? True for India cities and for country-less remote roles. */
+// Workday collapses multi-city postings to a place-less marker — "2 Locations",
+// "Multiple Locations" — with no country to key on. Treated as location-unknown
+// so, per the India-first preference, they land in the India view rather than
+// being hidden in Global. (Other ATS sources emit real location strings, so in
+// practice this only catches Workday's collapsed listings.)
+const AMBIGUOUS_MULTI_RE = /^\s*(?:\d+|multiple)\s+locations?\s*$/i;
+
+/** India-eligible? True for India cities, country-less remote roles, and
+ * place-less multi-location markers (India-first preference). */
 export function isIndiaLocation(location: string): boolean {
   if (!location) return true; // unknown → treat as India-eligible (often remote)
   const loc = location.toLowerCase();
   if (INDIA_TOKENS.some((t) => loc.includes(t))) return true;
+  if (AMBIGUOUS_MULTI_RE.test(location)) return true; // "2 Locations" → unknown
   // Generic remote with no country named (e.g. "Remote", "Worldwide") → eligible.
   let stripped = loc;
   for (const g of GENERIC_REMOTE) stripped = stripped.replaceAll(g, "");

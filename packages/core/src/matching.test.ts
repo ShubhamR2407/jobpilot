@@ -69,4 +69,11 @@ describe("isIndiaLocation", () => {
   it("is false for a US city", () => {
     expect(isIndiaLocation("San Francisco, CA")).toBe(false);
   });
+  it("treats Workday's collapsed multi-location marker as India-eligible", () => {
+    expect(isIndiaLocation("2 Locations")).toBe(true);
+    expect(isIndiaLocation("Multiple Locations")).toBe(true);
+  });
+  it("does not misread a real city ending in a number as a multi-marker", () => {
+    expect(isIndiaLocation("US, CA, Santa Clara")).toBe(false);
+  });
 });
